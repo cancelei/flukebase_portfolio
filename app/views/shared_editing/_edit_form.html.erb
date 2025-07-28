@@ -1,0 +1,64 @@
+<div class="inline-editor-form" data-content-type="<%= content.class.name.underscore %>" data-content-id="<%= content.id %>" data-field="<%= local_assigns[:field] %>">
+  <% if content.class.name == 'SiteSetting' %>
+    <% if content.value_type == 'boolean' %>
+      <%= check_box_tag "inline_edit_#{content.key}", "true", SiteSetting.get(content.key), 
+          class: "inline-editor-checkbox",
+          data: { 
+            content_type: 'site_setting',
+            content_id: content.key,
+            field: 'value'
+          } %>
+    <% else %>
+      <%= text_field_tag "inline_edit_#{content.key}", content.value,
+          class: "inline-editor-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500",
+          data: { 
+            content_type: 'site_setting',
+            content_id: content.key,
+            field: 'value'
+          } %>
+    <% end %>
+  <% else %>
+    <% field_name = local_assigns[:field] || 'content' %>
+    <% if field_name == 'content' && content.respond_to?(:content) && content.content.is_a?(ActionText::RichText) %>
+      <%= rich_text_area_tag "inline_edit_#{content.class.name.underscore}_#{content.id}_#{field_name}", 
+          content.content,
+          class: "inline-editor-rich-text",
+          data: { 
+            content_type: content.class.name.underscore,
+            content_id: content.id,
+            field: field_name
+          } %>
+    <% else %>
+      <% current_value = content.respond_to?(field_name) ? content.send(field_name) : '' %>
+      <% if field_name.in?(['description', 'content']) && !content.respond_to?(:content) %>
+        <%= text_area_tag "inline_edit_#{content.class.name.underscore}_#{content.id}_#{field_name}", 
+            current_value,
+            rows: 4,
+            class: "inline-editor-textarea w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500",
+            data: { 
+              content_type: content.class.name.underscore,
+              content_id: content.id,
+              field: field_name
+            } %>
+      <% else %>
+        <%= text_field_tag "inline_edit_#{content.class.name.underscore}_#{content.id}_#{field_name}", 
+            current_value,
+            class: "inline-editor-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500",
+            data: { 
+              content_type: content.class.name.underscore,
+              content_id: content.id,
+              field: field_name
+            } %>
+      <% end %>
+    <% end %>
+  <% end %>
+  
+  <div class="inline-editor-actions mt-2 flex space-x-2">
+    <button type="button" class="inline-editor-save px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700">
+      Save
+    </button>
+    <button type="button" class="inline-editor-cancel px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700">
+      Cancel
+    </button>
+  </div>
+</div>

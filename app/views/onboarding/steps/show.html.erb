@@ -1,0 +1,47 @@
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+      Portfolio Setup
+    </h2>
+    <p class="mt-2 text-center text-sm text-gray-600">
+      Step <%= @current_step_index + 1 %> of <%= @total_steps %>
+    </p>
+  </div>
+
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <% case @step %>
+      <% when 'welcome' %>
+        <div class="text-center">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Welcome to Your Portfolio!</h3>
+          <p class="text-gray-600 mb-6">Let's get your portfolio set up in just a few steps.</p>
+          <%= link_to "Get Started", onboarding_step_path('site_settings'), class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        </div>
+
+      <% when 'site_settings' %>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Site Settings</h3>
+        <%= form_with url: onboarding_step_path(@step), method: :patch, local: true do |form| %>
+          <div class="mb-4">
+            <%= form.label :site_name, "Site Name", class: "block text-sm font-medium text-gray-700" %>
+            <%= form.text_field :site_name, value: @site_name, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" %>
+          </div>
+          <%= form.submit "Continue", class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700" %>
+        <% end %>
+
+      <% when 'complete' %>
+        <div class="text-center">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Setup Complete!</h3>
+          <p class="text-gray-600 mb-6">Your portfolio is now ready to use. You can always change these settings later in the admin panel.</p>
+          <%= link_to "Go to Admin Dashboard", complete_onboarding_path, method: :post, class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        </div>
+
+      <% else %>
+        <div class="text-center">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Setup Step</h3>
+          <p class="text-gray-600 mb-6">This step is under construction.</p>
+          <%= link_to "Skip to Complete", onboarding_step_path('complete'), class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

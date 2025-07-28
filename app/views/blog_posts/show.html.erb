@@ -1,0 +1,65 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Blog Post Header -->
+  <header class="mb-8">
+    <div class="text-center">
+      <h1 class="text-4xl font-bold text-gray-900 sm:text-5xl mb-4">
+        <%= @blog_post.title %>
+      </h1>
+      
+      <!-- Post Meta -->
+      <div class="flex items-center justify-center text-sm text-gray-500 space-x-4">
+        <time datetime="<%= @blog_post.published_at.iso8601 %>">
+          <%= @blog_post.published_at.strftime("%B %d, %Y") %>
+        </time>
+        <span>•</span>
+        <span><%= pluralize(@blog_post.content.to_plain_text.split.size, 'word') %></span>
+        <span>•</span>
+        <span><%= time_ago_in_words(@blog_post.published_at) %> ago</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Blog Post Content -->
+  <article class="prose prose-lg max-w-none">
+    <%= @blog_post.content %>
+  </article>
+
+  <!-- Post Footer -->
+  <footer class="mt-12 pt-8 border-t border-gray-200">
+    <!-- Navigation -->
+    <div class="flex justify-between items-center">
+      <%= link_to blog_posts_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+        <svg class="-ml-1 mr-3 h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+        </svg>
+        Back to Blog
+      <% end %>
+
+      <%= link_to root_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+        Home
+        <svg class="ml-3 -mr-1 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L9 5.414V17a1 1 0 102 0V5.414l5.293 5.293a1 1 0 001.414-1.414l-7-7z"></path>
+        </svg>
+      <% end %>
+    </div>
+
+    <!-- Newsletter Subscription -->
+    <div class="mt-8 bg-gray-50 rounded-lg p-6">
+      <div class="text-center">
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          Enjoyed this post?
+        </h3>
+        <p class="text-gray-600 mb-4">
+          Subscribe to get notified when I publish new content.
+        </p>
+        
+        <%= form_with url: subscribe_path, method: :post, local: false, class: "flex flex-col sm:flex-row gap-3 max-w-md mx-auto" do |form| %>
+          <%= form.email_field :email, placeholder: "Enter your email", required: true,
+              class: "flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" %>
+          <%= form.submit "Subscribe", 
+              class: "px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        <% end %>
+      </div>
+    </div>
+  </footer>
+</div>

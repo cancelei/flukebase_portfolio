@@ -1,0 +1,299 @@
+<div class="px-4 py-6 sm:px-0">
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="text-2xl font-semibold text-gray-900">Flukebase Integration</h1>
+      <p class="mt-2 text-sm text-gray-700">Configure your Flukebase API connection to sync projects automatically</p>
+    </div>
+    <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      <% if @flukebase_enabled %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-green-400" fill="currentColor" viewBox="0 0 8 8">
+            <circle cx="4" cy="4" r="3" />
+          </svg>
+          Enabled
+        </span>
+      <% else %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+          <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-gray-400" fill="currentColor" viewBox="0 0 8 8">
+            <circle cx="4" cy="4" r="3" />
+          </svg>
+          Disabled
+        </span>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mt-8 space-y-8">
+    <!-- Configuration Form -->
+    <div class="bg-white shadow sm:rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">API Configuration</h3>
+        
+        <%= form_with url: admin_flukebase_settings_path, method: :patch, local: true, class: "space-y-6" do |form| %>
+          <!-- Enable/Disable Integration -->
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <%= check_box_tag :flukebase_integration_enabled, "1", @flukebase_enabled, 
+                  class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded",
+                  id: "flukebase_enabled_checkbox" %>
+            </div>
+            <div class="ml-3 text-sm">
+              <label for="flukebase_enabled_checkbox" class="font-medium text-gray-700">
+                Enable Flukebase Integration
+              </label>
+              <p class="text-gray-500">Automatically sync projects from your Flukebase account</p>
+            </div>
+          </div>
+
+          <!-- API Key -->
+          <div>
+            <label for="flukebase_api_key" class="block text-sm font-medium text-gray-700">
+              API Key
+            </label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+              <%= password_field_tag :flukebase_api_key, @api_key, 
+                  placeholder: "Enter your Flukebase API key",
+                  class: "focus:ring-indigo-500 focus:border-indigo-500 block w-full pr-10 sm:text-sm border-gray-300 rounded-md",
+                  id: "flukebase_api_key" %>
+              <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                <button type="button" onclick="toggleApiKeyVisibility()" class="text-gray-400 hover:text-gray-500">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" id="eye-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <p class="mt-2 text-sm text-gray-500">
+              Get your API key from your 
+              <a href="https://flukebase.me/settings/api" target="_blank" class="text-indigo-600 hover:text-indigo-500">
+                Flukebase account settings
+              </a>
+            </p>
+          </div>
+
+          <!-- API URL -->
+          <div>
+            <label for="flukebase_api_url" class="block text-sm font-medium text-gray-700">
+              API URL
+            </label>
+            <%= text_field_tag :flukebase_api_url, @api_url,
+                placeholder: "https://flukebase.me/api/v1/",
+                class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+            <p class="mt-2 text-sm text-gray-500">
+              Default: https://flukebase.me/api/v1/
+            </p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex space-x-3">
+            <%= form.submit "Save Settings", 
+                class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            
+            <button type="button" onclick="testConnection()" 
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    id="test-connection-btn">
+              <svg class="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              Test Connection
+            </button>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Sync Status -->
+    <div class="bg-white shadow sm:rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Sync Status</h3>
+        
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <div class="bg-gray-50 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">Last Sync</dt>
+                    <dd class="text-lg font-medium text-gray-900">
+                      <% if @last_sync.present? %>
+                        <%= time_ago_in_words(Time.parse(@last_sync)) %> ago
+                      <% else %>
+                        Never
+                      <% end %>
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                  </svg>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">Projects Synced</dt>
+                    <dd class="text-lg font-medium text-gray-900"><%= @sync_count %></dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <% if @flukebase_enabled %>
+                    <svg class="h-6 w-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                  <% else %>
+                    <svg class="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                  <% end %>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">Status</dt>
+                    <dd class="text-lg font-medium text-gray-900">
+                      <%= @flukebase_enabled ? 'Active' : 'Inactive' %>
+                    </dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Manual Sync Button -->
+        <div class="mt-6">
+          <%= link_to admin_flukebase_settings_sync_path, method: :post,
+              class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 #{'opacity-50 cursor-not-allowed' unless @flukebase_enabled && @api_key.present?}",
+              onclick: (@flukebase_enabled && @api_key.present? ? nil : 'return false;') do %>
+            <svg class="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Sync Now
+          <% end %>
+          <% unless @flukebase_enabled && @api_key.present? %>
+            <p class="mt-2 text-sm text-gray-500">
+              Enable integration and configure API key to sync projects
+            </p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <h4 class="text-sm font-medium text-blue-900 mb-2">How Flukebase Integration Works</h4>
+      <div class="text-sm text-blue-700 space-y-2">
+        <p>• <strong>Automatic Sync:</strong> When enabled, projects are synced from your Flukebase account</p>
+        <p>• <strong>Draft Mode:</strong> Synced projects are created as drafts (unpublished) for your review</p>
+        <p>• <strong>Safe Updates:</strong> Existing projects are updated safely without losing your customizations</p>
+        <p>• <strong>Tag Sync:</strong> Project tags are automatically synchronized and created as needed</p>
+        <p>• <strong>Manual Control:</strong> You can manually trigger syncs or disable the integration anytime</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for UI interactions -->
+<script>
+function toggleApiKeyVisibility() {
+  const input = document.getElementById('flukebase_api_key');
+  const icon = document.getElementById('eye-icon');
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"></path>';
+  } else {
+    input.type = 'password';
+    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+  }
+}
+
+function testConnection() {
+  const btn = document.getElementById('test-connection-btn');
+  const originalText = btn.innerHTML;
+  
+  // Show loading state
+  btn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Testing...';
+  btn.disabled = true;
+  
+  // Get current form values
+  const apiKey = document.getElementById('flukebase_api_key').value;
+  
+  fetch('<%= admin_flukebase_settings_test_path %>', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+    },
+    body: JSON.stringify({ flukebase_api_key: apiKey })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      showNotification(data.message, 'success');
+    } else {
+      showNotification(data.error, 'error');
+    }
+  })
+  .catch(error => {
+    showNotification('Connection test failed: ' + error.message, 'error');
+  })
+  .finally(() => {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  });
+}
+
+function showNotification(message, type) {
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = `fixed top-4 right-4 p-4 rounded-md shadow-lg z-50 ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`;
+  notification.innerHTML = `
+    <div class="flex">
+      <div class="flex-shrink-0">
+        ${type === 'success' ? 
+          '<svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>' :
+          '<svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>'
+        }
+      </div>
+      <div class="ml-3">
+        <p class="text-sm font-medium">${message}</p>
+      </div>
+      <div class="ml-auto pl-3">
+        <div class="-mx-1.5 -my-1.5">
+          <button onclick="this.parentElement.parentElement.parentElement.parentElement.remove()" class="inline-flex rounded-md p-1.5 hover:bg-gray-100 focus:outline-none">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // Auto-remove after 5 seconds
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.remove();
+    }
+  }, 5000);
+}
+</script>

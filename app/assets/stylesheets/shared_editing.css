@@ -1,0 +1,179 @@
+/* Shared Editing Styles */
+.editable-content {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.editable-content:hover {
+  background-color: rgba(99, 102, 241, 0.05);
+  border-radius: 4px;
+  padding: 4px;
+  margin: -4px;
+}
+
+.editable-controls {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  z-index: 10;
+}
+
+.editable-controls .edit-btn {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.editable-controls .edit-btn:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.editable-form-container {
+  position: relative;
+  z-index: 20;
+}
+
+.inline-editor-form {
+  background: white;
+  border: 2px solid #6366f1;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 30;
+}
+
+.inline-editor-input,
+.inline-editor-textarea,
+.inline-editor-rich-text {
+  width: 100%;
+  min-width: 200px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  transition: border-color 0.2s ease;
+}
+
+.inline-editor-input:focus,
+.inline-editor-textarea:focus,
+.inline-editor-rich-text:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.inline-editor-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.inline-editor-rich-text {
+  min-height: 120px;
+}
+
+.inline-editor-checkbox {
+  width: auto;
+  margin-right: 8px;
+}
+
+.inline-editor-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: flex-end;
+}
+
+.inline-editor-save,
+.inline-editor-cancel {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.inline-editor-save {
+  background-color: #10b981;
+  color: white;
+}
+
+.inline-editor-save:hover {
+  background-color: #059669;
+}
+
+.inline-editor-cancel {
+  background-color: #6b7280;
+  color: white;
+}
+
+.inline-editor-cancel:hover {
+  background-color: #4b5563;
+}
+
+/* Trix editor customizations */
+trix-editor {
+  border: 1px solid #d1d5db !important;
+  border-radius: 6px !important;
+  padding: 12px !important;
+  min-height: 120px !important;
+}
+
+trix-editor:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+}
+
+trix-toolbar {
+  border: 1px solid #d1d5db !important;
+  border-bottom: none !important;
+  border-radius: 6px 6px 0 0 !important;
+  background: #f9fafb !important;
+}
+
+/* Hide edit controls when not needed */
+.editable-content:not(:hover) .editable-controls {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.editable-content:hover .editable-controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Loading states */
+.inline-editor-saving {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.inline-editor-saving::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #6366f1;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

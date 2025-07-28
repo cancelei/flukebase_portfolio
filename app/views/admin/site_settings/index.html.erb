@@ -1,0 +1,125 @@
+<div class="px-4 py-6 sm:px-0">
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="text-2xl font-semibold text-gray-900">Site Settings</h1>
+      <p class="mt-2 text-sm text-gray-700">Configure your portfolio site settings and features</p>
+    </div>
+  </div>
+
+  <div class="mt-8 space-y-8">
+    <!-- Existing Settings -->
+    <% if @site_settings.any? %>
+      <%= form_with url: admin_site_settings_path, method: :patch, local: true do |form| %>
+        <div class="bg-white shadow sm:rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Current Settings</h3>
+            <div class="space-y-6">
+              <% @site_settings.each do |setting| %>
+                <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                  <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">
+                      <%= setting.key.humanize %>
+                    </label>
+                    <p class="text-xs text-gray-500 mt-1"><%= setting.key %></p>
+                  </div>
+                  
+                  <div class="sm:col-span-3">
+                    <% case setting.value_type %>
+                    <% when 'boolean' %>
+                      <div class="flex items-center">
+                        <%= check_box_tag "site_settings[#{setting.key}][value]", "true", 
+                            SiteSetting.get(setting.key), 
+                            class: "focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded" %>
+                        <%= hidden_field_tag "site_settings[#{setting.key}][value_type]", "boolean" %>
+                        <label class="ml-2 block text-sm text-gray-900">
+                          Enabled
+                        </label>
+                      </div>
+                    <% when 'integer' %>
+                      <%= number_field_tag "site_settings[#{setting.key}][value]", 
+                          SiteSetting.get(setting.key), 
+                          class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+                      <%= hidden_field_tag "site_settings[#{setting.key}][value_type]", "integer" %>
+                    <% else %>
+                      <%= text_field_tag "site_settings[#{setting.key}][value]", 
+                          SiteSetting.get(setting.key), 
+                          class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+                      <%= hidden_field_tag "site_settings[#{setting.key}][value_type]", "string" %>
+                    <% end %>
+                  </div>
+                  
+                  <div class="sm:col-span-1">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      <%= setting.value_type %>
+                    </span>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+            
+            <div class="mt-6">
+              <%= form.submit "Update Settings", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+
+    <!-- Add New Setting -->
+    <div class="bg-white shadow sm:rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Add New Setting</h3>
+        <%= form_with model: [:admin, @new_setting], url: admin_site_settings_path, method: :patch, local: true do |form| %>
+          <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+            <div class="sm:col-span-2">
+              <%= form.label :key, class: "block text-sm font-medium text-gray-700" %>
+              <%= form.text_field :key, class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+              <% if @new_setting.errors[:key].any? %>
+                <p class="mt-2 text-sm text-red-600"><%= @new_setting.errors[:key].first %></p>
+              <% end %>
+            </div>
+            
+            <div class="sm:col-span-2">
+              <%= form.label :value, class: "block text-sm font-medium text-gray-700" %>
+              <%= form.text_field :value, class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+              <% if @new_setting.errors[:value].any? %>
+                <p class="mt-2 text-sm text-red-600"><%= @new_setting.errors[:value].first %></p>
+              <% end %>
+            </div>
+            
+            <div class="sm:col-span-1">
+              <%= form.label :value_type, "Type", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.select :value_type, 
+                  options_for_select([
+                    ['String', 'string'],
+                    ['Boolean', 'boolean'],
+                    ['Integer', 'integer']
+                  ], @new_setting.value_type || 'string'),
+                  {},
+                  { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md" } %>
+            </div>
+            
+            <div class="sm:col-span-1">
+              <label class="block text-sm font-medium text-gray-700">&nbsp;</label>
+              <%= form.submit "Add Setting", class: "mt-1 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Common Settings Help -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <h4 class="text-sm font-medium text-blue-900 mb-2">Common Settings</h4>
+      <div class="text-sm text-blue-700 space-y-1">
+        <p><strong>site_name</strong> (string) - The name of your portfolio site</p>
+        <p><strong>blog_enabled</strong> (boolean) - Enable/disable the blog feature</p>
+        <p><strong>resume_enabled</strong> (boolean) - Enable/disable resume downloads</p>
+        <p><strong>ai_chat_enabled</strong> (boolean) - Enable/disable AI chat feature</p>
+        <p><strong>flukebase_integration_enabled</strong> (boolean) - Enable/disable Flukebase sync</p>
+        <p><strong>custom_domain</strong> (string) - Your custom domain name</p>
+        <p><strong>onboarding_complete</strong> (boolean) - Whether onboarding is complete</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,103 @@
+/* Inline editing styles for CV entries */
+.editable-content {
+  position: relative;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s ease;
+}
+
+.editable-content:hover {
+  background-color: rgba(99, 102, 241, 0.05);
+}
+
+.editable-controls {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  z-index: 10;
+}
+
+.edit-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  background-color: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+  background-color: rgba(99, 102, 241, 0.2);
+  transform: translateY(-1px);
+}
+
+.editable-form-container {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+}
+
+.inline-editor-input,
+.inline-editor-textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+}
+
+.inline-editor-input:focus,
+.inline-editor-textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.inline-editor-save,
+.inline-editor-cancel {
+  padding: 0.5rem 1rem;
+  margin-right: 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.inline-editor-save {
+  background-color: #10b981;
+  color: white;
+  border: 1px solid #10b981;
+}
+
+.inline-editor-save:hover {
+  background-color: #059669;
+  border-color: #059669;
+}
+
+.inline-editor-cancel {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.inline-editor-cancel:hover {
+  background-color: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+/* Trix editor styles for inline editing */
+.trix-content {
+  min-height: 100px;
+}
+
+.trix-editor-wrapper {
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+}
+
+.trix-editor-wrapper:focus-within {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}

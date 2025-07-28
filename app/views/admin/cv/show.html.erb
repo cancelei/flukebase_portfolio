@@ -1,0 +1,87 @@
+<div class="bg-white">
+  <div class="mx-auto max-w-4xl px-6 lg:px-8 py-24 sm:py-32">
+    <div class="mx-auto max-w-2xl lg:mx-0">
+      <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">Curriculum Vitae</h1>
+      <p class="mt-6 text-lg leading-8 text-gray-600">
+        My professional background and experience
+      </p>
+    </div>
+
+    <div class="mt-8 mb-8">
+      <%= form_with model: CvEntry.new, url: cv_entries_path, local: true, class: "bg-white shadow rounded-lg p-6 mb-8" do |form| %>
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Add New CV Entry</h3>
+        
+        <div class="grid grid-cols-1 gap-6">
+          <div>
+            <%= form.label :title, class: "block text-sm font-medium text-gray-700" %>
+            <%= form.text_field :title, class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+          
+          <div>
+            <%= form.label :position, "Display Order", class: "block text-sm font-medium text-gray-700" %>
+            <%= form.number_field :position, class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md", value: (CvEntry.maximum(:position) || 0) + 1 %>
+          </div>
+          
+          <div>
+            <%= form.label :content, class: "block text-sm font-medium text-gray-700" %>
+            <%= form.rich_text_area :content, class: "trix-content focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+          </div>
+        </div>
+        
+        <div class="mt-6">
+          <%= form.submit "Add CV Entry", class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        </div>
+      <% end %>
+    </div>
+
+    <% if @cv_entries.any? %>
+      <div class="mt-16 space-y-16">
+        <% @cv_entries.each do |entry| %>
+          <div class="bg-white overflow-hidden shadow rounded-lg mb-6">
+            <div class="px-4 py-5 sm:p-6">
+              <div class="flex justify-between items-start">
+                <div class="editable-content" data-controller="shared-editing" 
+                     data-shared-editing-content-type-value="CvEntry" 
+                     data-shared-editing-content-id-value="<%= entry.id %>" 
+                     data-shared-editing-field-value="title">
+                  <div class="editable-display">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-3"><%= entry.title %></h3>
+                  </div>
+                  <div class="editable-controls hidden">
+                    <button class="edit-btn text-indigo-600 hover:text-indigo-900 text-sm">Edit</button>
+                  </div>
+                </div>
+                
+                <div class="flex space-x-2">
+                  <%= button_to "Delete", cv_entry_path(entry), method: :delete, 
+                      data: { confirm: "Are you sure you want to delete this CV entry?" }, 
+                      class: "text-red-600 hover:text-red-900 text-sm" %>
+                </div>
+              </div>
+              
+              <div class="editable-content" data-controller="shared-editing" 
+                   data-shared-editing-content-type-value="CvEntry" 
+                   data-shared-editing-content-id-value="<%= entry.id %>" 
+                   data-shared-editing-field-value="content">
+                <div class="editable-display">
+                  <div class="text-gray-700 prose max-w-none"><%= entry.content %></div>
+                </div>
+                <div class="editable-controls hidden">
+                  <button class="edit-btn text-indigo-600 hover:text-indigo-900 text-sm">Edit</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center mt-16">
+        <p class="text-gray-500">CV information will be available soon.</p>
+      </div>
+    <% end %>
+
+    <div class="mt-8 flex justify-center">
+      <%= link_to "← Back to Admin Dashboard", admin_dashboard_path, class: "text-indigo-600 hover:text-indigo-500" %>
+    </div>
+  </div>
+</div>

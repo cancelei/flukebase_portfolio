@@ -1,0 +1,86 @@
+<div class="bg-white">
+  <div class="mx-auto max-w-7xl px-6 lg:px-8 py-24 sm:py-32">
+    <div class="mx-auto max-w-2xl lg:mx-0">
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Projects</h2>
+      <p class="mt-2 text-lg leading-8 text-gray-600">Explore my work and side projects</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="mt-10 border-b border-gray-200 pb-5">
+      <%= form_with url: projects_path, method: :get, local: true, class: "flex flex-wrap gap-4" do |form| %>
+        <%= form.text_field :search, placeholder: "Search projects...", value: params[:search], class: "block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
+        
+        <%= form.select :tag, options_from_collection_for_select(@tags, :name, :name, params[:tag]), 
+            { prompt: "All tags" }, 
+            { class: "block rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" } %>
+        
+        <%= form.submit "Filter", class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+        
+        <% if params[:search].present? || params[:tag].present? %>
+          <%= link_to "Clear", projects_path, class: "rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-300" %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <!-- Projects Grid -->
+    <% if @projects.any? %>
+      <div class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+        <% @projects.each do |project| %>
+          <article class="flex flex-col items-start justify-between">
+            <% if project.images.any? %>
+              <div class="relative w-full">
+                <%= image_tag project.images.first, class: "aspect-[16/9] w-full rounded-2xl bg-gray-100 object-cover sm:aspect-[2/1] lg:aspect-[3/2]" %>
+                <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-gray-900/10"></div>
+              </div>
+            <% end %>
+            
+            <div class="max-w-xl">
+              <div class="mt-8 flex items-center gap-x-4 text-xs">
+                <% project.tags.each do |tag| %>
+                  <span class="relative z-10 rounded-full bg-gray-50 px-3 py-1.5 font-medium text-gray-600 hover:bg-gray-100">
+                    <%= tag.name %>
+                  </span>
+                <% end %>
+              </div>
+              
+              <div class="group relative">
+                <h3 class="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
+                  <%= link_to project_path(project.slug) do %>
+                    <span class="absolute inset-0"></span>
+                    <%= project.title %>
+                  <% end %>
+                </h3>
+                <p class="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">
+                  <%= truncate(project.description.to_plain_text, length: 150) %>
+                </p>
+              </div>
+              
+              <div class="relative mt-8 flex items-center gap-x-4">
+                <% if project.github_url.present? %>
+                  <%= link_to project.github_url, target: "_blank", class: "text-sm font-semibold leading-6 text-indigo-600 hover:text-indigo-500" do %>
+                    GitHub →
+                  <% end %>
+                <% end %>
+                
+                <% if project.demo_url.present? %>
+                  <%= link_to project.demo_url, target: "_blank", class: "text-sm font-semibold leading-6 text-indigo-600 hover:text-indigo-500" do %>
+                    Live Demo →
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </article>
+        <% end %>
+      </div>
+
+      <!-- Pagination -->
+      <div class="mt-16">
+        <%= paginate @projects if respond_to?(:paginate) %>
+      </div>
+    <% else %>
+      <div class="text-center mt-16">
+        <p class="text-gray-500">No projects found.</p>
+      </div>
+    <% end %>
+  </div>
+</div>

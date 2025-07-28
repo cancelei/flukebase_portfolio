@@ -1,0 +1,110 @@
+<div class="bg-white">
+  <!-- Hero Section -->
+  <div class="relative isolate px-6 pt-14 lg:px-8">
+    <div class="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
+      <div class="text-center">
+        <%= editable_content(SiteSetting.find_by(key: 'site_title') || SiteSetting.new(key: 'site_title', value: 'Welcome to My Portfolio', value_type: 'string'), tag: :h1, css_class: 'text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl', field: 'value') do %>
+          Welcome to My Portfolio
+        <% end %>
+        <%= editable_content(SiteSetting.find_by(key: 'site_description') || SiteSetting.new(key: 'site_description', value: "Discover my projects, read my blog, and learn about my professional journey. Feel free to explore and get in touch!", value_type: 'string'), tag: :p, css_class: 'mt-6 text-lg leading-8 text-gray-600', field: 'value') do %>
+          Discover my projects, read my blog, and learn about my professional journey. Feel free to explore and get in touch!
+        <% end %>
+        <div class="mt-10 flex items-center justify-center gap-x-6">
+          <%= link_to "View Projects", projects_path, class: "rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+          <%= link_to "Read Blog", blog_posts_path, class: "text-sm font-semibold leading-6 text-gray-900" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured Projects Section -->
+  <% if @featured_projects.any? %>
+    <div class="py-24 sm:py-32">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl lg:mx-0">
+          <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Featured Projects</h2>
+          <p class="mt-2 text-lg leading-8 text-gray-600">Check out some of my latest work</p>
+        </div>
+        <div class="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 border-t border-gray-200 pt-10 sm:mt-16 sm:pt-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+          <% @featured_projects.each do |project| %>
+            <article class="flex max-w-xl flex-col items-start justify-between">
+              <div class="group relative">
+                <h3 class="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
+                  <%= link_to project_path(project) do %>
+                    <span class="absolute inset-0"></span>
+                    <%= project.title %>
+                  <% end %>
+                </h3>
+                <p class="mt-5 line-clamp-3 text-sm leading-6 text-gray-600">
+                  <%= truncate(project.description.to_plain_text, length: 150) %>
+                </p>
+              </div>
+              <div class="relative mt-8 flex items-center gap-x-4">
+                <% if project.tags.any? %>
+                  <div class="flex flex-wrap gap-2">
+                    <% project.tags.each do |tag| %>
+                      <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                        <%= tag.name %>
+                      </span>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </article>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Recent Blog Posts Section -->
+  <% if @recent_blog_posts.any? %>
+    <div class="bg-gray-50 py-24 sm:py-32">
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto max-w-2xl lg:mx-0">
+          <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Recent Blog Posts</h2>
+          <p class="mt-2 text-lg leading-8 text-gray-600">Stay updated with my latest thoughts and insights</p>
+        </div>
+        <div class="mx-auto mt-10 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 border-t border-gray-200 pt-10 sm:mt-16 sm:pt-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+          <% @recent_blog_posts.each do |post| %>
+            <article class="flex max-w-xl flex-col items-start justify-between">
+              <div class="flex items-center gap-x-4 text-xs">
+                <time datetime="<%= post.published_at&.iso8601 %>" class="text-gray-500">
+                  <%= post.published_at&.strftime("%B %d, %Y") %>
+                </time>
+              </div>
+              <div class="group relative">
+                <h3 class="mt-3 text-lg font-semibold leading-6 text-gray-900 group-hover:text-gray-600">
+                  <%= link_to blog_post_path(post) do %>
+                    <span class="absolute inset-0"></span>
+                    <%= post.title %>
+                  <% end %>
+                </h3>
+              </div>
+            </article>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Newsletter Subscription -->
+  <div class="bg-indigo-600">
+    <div class="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
+      <div class="mx-auto max-w-2xl text-center">
+        <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Stay updated</h2>
+        <p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-indigo-200">
+          Subscribe to get notified about new projects and blog posts.
+        </p>
+        <div class="mt-10 flex items-center justify-center gap-x-6">
+          <div id="subscription_form">
+            <%= form_with model: Subscriber.new, url: subscribe_path, local: false, class: "flex gap-x-4" do |form| %>
+              <%= form.email_field :email, placeholder: "Enter your email", class: "min-w-0 flex-auto rounded-md border-0 bg-white/5 px-3.5 py-2 text-white shadow-sm ring-1 ring-inset ring-white/10 focus:ring-2 focus:ring-inset focus:ring-white sm:text-sm sm:leading-6", required: true %>
+              <%= form.submit "Subscribe", class: "flex-none rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

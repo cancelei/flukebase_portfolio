@@ -1,0 +1,56 @@
+<div class="px-4 py-6 sm:px-0">
+  <div class="md:grid md:grid-cols-3 md:gap-6">
+    <div class="md:col-span-1">
+      <div class="px-4 sm:px-0">
+        <h3 class="text-lg font-medium leading-6 text-gray-900">Edit CV Entry</h3>
+        <p class="mt-1 text-sm text-gray-600">
+          Update your CV section content and display order.
+        </p>
+      </div>
+    </div>
+    <div class="mt-5 md:mt-0 md:col-span-2">
+      <%= form_with model: [:admin, @cv_entry], local: true, class: "space-y-6" do |form| %>
+        <div class="shadow sm:rounded-md sm:overflow-hidden">
+          <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+            
+            <!-- Title -->
+            <div>
+              <%= form.label :title, class: "block text-sm font-medium text-gray-700" %>
+              <%= form.text_field :title, class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+              <% if @cv_entry.errors[:title].any? %>
+                <p class="mt-2 text-sm text-red-600"><%= @cv_entry.errors[:title].first %></p>
+              <% end %>
+            </div>
+
+            <!-- Position -->
+            <div>
+              <%= form.label :position, "Display Order", class: "block text-sm font-medium text-gray-700" %>
+              <%= form.number_field :position, class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+              <p class="mt-2 text-sm text-gray-500">Lower numbers appear first on your CV</p>
+              <% if @cv_entry.errors[:position].any? %>
+                <p class="mt-2 text-sm text-red-600"><%= @cv_entry.errors[:position].first %></p>
+              <% end %>
+            </div>
+
+            <!-- Content -->
+            <div>
+              <%= form.label :content, class: "block text-sm font-medium text-gray-700" %>
+              <div class="mt-1">
+                <%= form.rich_text_area :content, class: "trix-content focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
+              </div>
+              <p class="mt-2 text-sm text-gray-500">Use rich text formatting for your CV content</p>
+              <% if @cv_entry.errors[:content].any? %>
+                <p class="mt-2 text-sm text-red-600"><%= @cv_entry.errors[:content].first %></p>
+              <% end %>
+            </div>
+          </div>
+
+          <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 space-x-3">
+            <%= link_to "Cancel", admin_cv_entry_path(@cv_entry), class: "bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            <%= form.submit "Update CV Entry", class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
