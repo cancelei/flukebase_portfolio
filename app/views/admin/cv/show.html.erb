@@ -1,87 +1,190 @@
-<div class="bg-white">
-  <div class="mx-auto max-w-4xl px-6 lg:px-8 py-24 sm:py-32">
-    <div class="mx-auto max-w-2xl lg:mx-0">
-      <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">Curriculum Vitae</h1>
-      <p class="mt-6 text-lg leading-8 text-gray-600">
-        My professional background and experience
-      </p>
-    </div>
-
-    <div class="mt-8 mb-8">
-      <%= form_with model: CvEntry.new, url: cv_entries_path, local: true, class: "bg-white shadow rounded-lg p-6 mb-8" do |form| %>
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Add New CV Entry</h3>
-        
-        <div class="grid grid-cols-1 gap-6">
-          <div>
-            <%= form.label :title, class: "block text-sm font-medium text-gray-700" %>
-            <%= form.text_field :title, class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
-          </div>
-          
-          <div>
-            <%= form.label :position, "Display Order", class: "block text-sm font-medium text-gray-700" %>
-            <%= form.number_field :position, class: "mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md", value: (CvEntry.maximum(:position) || 0) + 1 %>
-          </div>
-          
-          <div>
-            <%= form.label :content, class: "block text-sm font-medium text-gray-700" %>
-            <%= form.rich_text_area :content, class: "trix-content focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" %>
-          </div>
+<!-- Admin CV Management Page -->
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50" data-controller="cv-page">
+  <!-- Admin Header -->
+  <div class="bg-white border-b border-gray-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+            <svg class="w-8 h-8 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            CV Management
+          </h1>
+          <p class="mt-2 text-gray-600">Manage your professional experience and achievements</p>
         </div>
         
-        <div class="mt-6">
-          <%= form.submit "Add CV Entry", class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        <div class="flex items-center space-x-4">
+          <%= link_to cv_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors duration-200", target: "_blank" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+            View Public CV
+          <% end %>
+          
+          <%= link_to admin_dashboard_path, class: "inline-flex items-center px-4 py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors duration-200" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Back to Dashboard
+          <% end %>
         </div>
-      <% end %>
+      </div>
     </div>
+  </div>
 
-    <% if @cv_entries.any? %>
-      <div class="mt-16 space-y-16">
-        <% @cv_entries.each do |entry| %>
-          <div class="bg-white overflow-hidden shadow rounded-lg mb-6">
-            <div class="px-4 py-5 sm:p-6">
-              <div class="flex justify-between items-start">
-                <div class="editable-content" data-controller="shared-editing" 
-                     data-shared-editing-content-type-value="CvEntry" 
-                     data-shared-editing-content-id-value="<%= entry.id %>" 
-                     data-shared-editing-field-value="title">
-                  <div class="editable-display">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-3"><%= entry.title %></h3>
-                  </div>
-                  <div class="editable-controls hidden">
-                    <button class="edit-btn text-indigo-600 hover:text-indigo-900 text-sm">Edit</button>
-                  </div>
-                </div>
-                
-                <div class="flex space-x-2">
-                  <%= button_to "Delete", cv_entry_path(entry), method: :delete, 
-                      data: { confirm: "Are you sure you want to delete this CV entry?" }, 
-                      class: "text-red-600 hover:text-red-900 text-sm" %>
-                </div>
-              </div>
-              
-              <div class="editable-content" data-controller="shared-editing" 
-                   data-shared-editing-content-type-value="CvEntry" 
-                   data-shared-editing-content-id-value="<%= entry.id %>" 
-                   data-shared-editing-field-value="content">
-                <div class="editable-display">
-                  <div class="text-gray-700 prose max-w-none"><%= entry.content %></div>
-                </div>
-                <div class="editable-controls hidden">
-                  <button class="edit-btn text-indigo-600 hover:text-indigo-900 text-sm">Edit</button>
-                </div>
+  <!-- Quick Add Section -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <%= form_with model: CvEntry.new, url: cv_entries_path, local: true, class: "space-y-6" do |form| %>
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+          <h3 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+            <svg class="w-6 h-6 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Add New Experience
+          </h3>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="lg:col-span-2">
+              <%= form.label :title, "Position/Role Title", class: "block text-sm font-semibold text-gray-900 mb-2" %>
+              <%= form.text_field :title, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200", placeholder: "e.g., Senior Software Engineer" %>
+            </div>
+            
+            <div>
+              <%= form.label :position, "Display Order", class: "block text-sm font-semibold text-gray-900 mb-2" %>
+              <%= form.number_field :position, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200", value: (CvEntry.maximum(:position) || 0) + 1 %>
+            </div>
+            
+            <div class="lg:col-span-2">
+              <%= form.label :content, "Description & Achievements", class: "block text-sm font-semibold text-gray-900 mb-2" %>
+              <div class="border border-gray-300 rounded-lg overflow-hidden">
+                <%= form.rich_text_area :content, class: "trix-content min-h-32" %>
               </div>
             </div>
           </div>
-        <% end %>
+          
+          <div class="flex justify-end mt-6">
+            <%= form.submit "Add Experience", class: "px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- CV Entries Management -->
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <% if @cv_entries.any? %>
+      <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Current Experiences</h2>
+        <p class="text-gray-600">Click on any field to edit it inline. Changes are saved automatically.</p>
+      </div>
+      
+      <!-- Timeline View -->
+      <div class="relative">
+        <!-- Timeline Line -->
+        <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500 to-indigo-500 hidden lg:block"></div>
+        
+        <!-- CV Entries -->
+        <div class="space-y-8" data-controller="timeline-animations">
+          <% @cv_entries.each_with_index do |entry, index| %>
+            <div class="cv-entry group relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1" 
+                 data-controller="cv-entry" 
+                 data-timeline-animations-target="entry"
+                 data-cv-entry-index-value="<%= index %>">
+              
+              <!-- Timeline Dot -->
+              <div class="hidden lg:block absolute -left-12 top-8 w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full border-4 border-white shadow-lg group-hover:scale-110 transition-transform duration-200">
+                <div class="absolute inset-2 bg-white rounded-full"></div>
+              </div>
+              
+              <!-- Entry Content -->
+              <div class="p-8">
+                <!-- Header with Title and Actions -->
+                <div class="flex items-start justify-between mb-6">
+                  <div class="flex-1">
+                    <!-- Editable Title -->
+                    <div class="editable-content" data-controller="shared-editing" 
+                         data-shared-editing-content-type-value="CvEntry" 
+                         data-shared-editing-content-id-value="<%= entry.id %>" 
+                         data-shared-editing-field-value="title">
+                      <div class="editable-display">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2 leading-tight group-hover:text-blue-600 transition-colors duration-200">
+                          <%= entry.title %>
+                        </h3>
+                      </div>
+                      <div class="editable-controls opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <button class="edit-btn inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 text-sm font-medium rounded-full hover:bg-blue-200 transition-colors duration-200">
+                          <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                          </svg>
+                          Edit Title
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <!-- Position Badge -->
+                    <div class="inline-flex items-center px-3 py-1 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 text-sm font-medium rounded-full">
+                      <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                      </svg>
+                      Position #<%= entry.position %>
+                    </div>
+                  </div>
+                  
+                  <!-- Admin Actions -->
+                  <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <%= button_to cv_entry_path(entry), method: :delete, 
+                        data: { confirm: "Are you sure you want to delete this experience?" }, 
+                        class: "inline-flex items-center px-3 py-1.5 bg-red-100 text-red-700 text-sm font-medium rounded-full hover:bg-red-200 transition-colors duration-200" do %>
+                      <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                      Delete
+                    <% end %>
+                  </div>
+                </div>
+                
+                <!-- Editable Content -->
+                <div class="editable-content prose-container" data-controller="shared-editing" 
+                     data-shared-editing-content-type-value="CvEntry" 
+                     data-shared-editing-content-id-value="<%= entry.id %>" 
+                     data-shared-editing-field-value="content">
+                  <div class="editable-display">
+                    <div class="prose prose-lg prose-blue max-w-none text-gray-700 leading-relaxed">
+                      <%= entry.content %>
+                    </div>
+                  </div>
+                  <div class="editable-controls opacity-0 group-hover:opacity-100 transition-opacity duration-200 mt-4">
+                    <button class="edit-btn inline-flex items-center px-3 py-1.5 bg-green-100 text-green-700 text-sm font-medium rounded-full hover:bg-green-200 transition-colors duration-200">
+                      <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                      </svg>
+                      Edit Content
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Decorative Bottom Border -->
+              <div class="h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-b-2xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+            </div>
+          <% end %>
+        </div>
       </div>
     <% else %>
-      <div class="text-center mt-16">
-        <p class="text-gray-500">CV information will be available soon.</p>
+      <!-- Empty State -->
+      <div class="text-center py-20 empty-state">
+        <div class="max-w-md mx-auto">
+          <svg class="mx-auto h-24 w-24 text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <h3 class="text-2xl font-semibold text-gray-900 mb-4">No Experience Added Yet</h3>
+          <p class="text-gray-600 mb-8 leading-relaxed">
+            Start building your professional story by adding your first experience or achievement using the form above.
+          </p>
+        </div>
       </div>
     <% end %>
-
-    <div class="mt-8 flex justify-center">
-      <%= link_to "← Back to Admin Dashboard", admin_dashboard_path, class: "text-indigo-600 hover:text-indigo-500" %>
-    </div>
   </div>
 </div>

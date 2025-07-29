@@ -24,28 +24,36 @@ export default class extends Controller {
       this.hideEditControls()
     })
 
-    // Handle edit button click
-    const editBtn = this.element.querySelector('.edit-btn')
-    if (editBtn) {
-      editBtn.addEventListener('click', (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        this.startEditing()
+    // Handle edit button click - find all edit buttons within this controller element
+    const editBtns = this.element.querySelectorAll('.edit-btn')
+    if (editBtns.length > 0) {
+      editBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          this.startEditing()
+        })
       })
     }
   }
 
   showEditControls() {
-    const controls = this.element.querySelector('.editable-controls')
-    if (controls) {
-      controls.classList.remove('hidden')
+    const controls = this.element.querySelectorAll('.editable-controls')
+    if (controls.length > 0) {
+      controls.forEach(control => {
+        control.classList.remove('hidden')
+        control.style.opacity = '1'
+      })
     }
   }
 
   hideEditControls() {
-    const controls = this.element.querySelector('.editable-controls')
-    if (controls && !this.element.querySelector('.inline-editor-form')) {
-      controls.classList.add('hidden')
+    const controls = this.element.querySelectorAll('.editable-controls')
+    if (controls.length > 0 && !this.element.querySelector('.inline-editor-form')) {
+      controls.forEach(control => {
+        control.classList.add('hidden')
+        control.style.opacity = '0'
+      })
     }
   }
 
@@ -59,12 +67,16 @@ export default class extends Controller {
     console.log('Starting edit for:', this.contentTypeValue, this.contentIdValue, this.fieldValue)
     
     try {
+      // Format the content_type correctly - convert CamelCase to snake_case
+      const contentType = this.contentTypeValue.replace(/([A-Z])/g, function(g) { return '_' + g.toLowerCase(); }).replace(/^_/, '')
+      
       const params = new URLSearchParams({
-        content_type: this.contentTypeValue.toLowerCase().replace(/([A-Z])/g, '_$1').toLowerCase(),
+        content_type: contentType,
         content_id: this.contentIdValue,
         field: this.fieldValue
       })
       
+      console.log('Request params:', params.toString())
       const response = await fetch(`/shared_editing/edit?${params}`, {
         method: 'GET',
         headers: {
@@ -87,8 +99,8 @@ export default class extends Controller {
   }
 
   showEditForm(html) {
-    const display = this.element.querySelector('.editable-display')
-    const controls = this.element.querySelector('.editable-controls')
+    const display = this.element.querySelector(':scope > .editable-display')
+    const controls = this.element.querySelector(':scope > .editable-controls')
     
     if (display) display.style.display = 'none'
     if (controls) controls.classList.add('hidden')
@@ -96,7 +108,7 @@ export default class extends Controller {
     // Create form container
     const formContainer = document.createElement('div')
     formContainer.innerHTML = html
-    formContainer.className = 'editable-form-container bg-white p-4 rounded-lg shadow-lg border border-gray-200'
+    formContainer.className = 'editable-form-container'
     
     this.element.appendChild(formContainer)
 
@@ -107,40 +119,69 @@ export default class extends Controller {
   setupFormListeners(formContainer) {
     const saveBtn = formContainer.querySelector('.inline-editor-save')
     const cancelBtn = formContainer.querySelector('.inline-editor-cancel')
-    const input = formContainer.querySelector('.inline-editor-input, .inline-editor-textarea, .inline-editor-rich-text, .inline-editor-checkbox')
+    const input = formContainer.querySelector('input[name="value"], textarea[name="value"]')
+    const trixEditor = formContainer.querySelector('trix-editor')
 
     if (saveBtn) {
-      saveBtn.addEventListener('click', () => this.saveContent(formContainer, input))
+      saveBtn.addEventListener('click', () => this.saveContent(formContainer, input, trixEditor))
     }
 
     if (cancelBtn) {
       cancelBtn.addEventListener('click', () => this.cancelEditing(formContainer))
     }
 
-    // Save on Enter key (except for textareas and rich text)
-    if (input && !input.classList.contains('inline-editor-textarea') && !input.classList.contains('inline-editor-rich-text')) {
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault()
-          this.saveContent(formContainer, input)
-        } else if (e.key === 'Escape') {
+    // Handle Trix editor
+    if (trixEditor) {
+      // Focus the Trix editor
+      setTimeout(() => {
+        trixEditor.focus()
+      }, 100)
+
+      // Handle keyboard shortcuts for Trix
+      trixEditor.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
           this.cancelEditing(formContainer)
         }
+        // Ctrl/Cmd + Enter to save
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault()
+          this.saveContent(formContainer, input, trixEditor)
+        }
       })
-    }
+    } else {
+      // Handle regular inputs
+      // Save on Enter key (except for textareas)
+      if (input && input.tagName !== 'TEXTAREA') {
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            this.saveContent(formContainer, input, trixEditor)
+          } else if (e.key === 'Escape') {
+            this.cancelEditing(formContainer)
+          }
+        })
+      }
 
-    // Auto-focus the input
-    if (input) {
-      input.focus()
-      if (input.type === 'text' || input.tagName === 'TEXTAREA') {
-        input.select()
+      // Escape key for textareas
+      if (input && input.tagName === 'TEXTAREA') {
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            this.cancelEditing(formContainer)
+          }
+        })
+      }
+
+      // Auto-focus the input
+      if (input) {
+        input.focus()
+        if (input.type === 'text' || input.tagName === 'TEXTAREA') {
+          input.select()
+        }
       }
     }
   }
 
-  async saveContent(formContainer, input) {
-    if (!input) return
-
+  async saveContent(formContainer, input, trixEditor) {
     // Disable save button and show loading state
     const saveBtn = formContainer.querySelector('.inline-editor-save')
     const originalText = saveBtn ? saveBtn.textContent : 'Save'
@@ -150,14 +191,37 @@ export default class extends Controller {
     }
 
     let value
-    if (input.classList.contains('inline-editor-checkbox')) {
-      value = input.checked
-    } else if (input.classList.contains('inline-editor-rich-text')) {
-      // For Trix editor, get the content from the editor
-      const trixEditor = input.editor
-      value = trixEditor ? trixEditor.getDocument().toString() : input.value
+    if (trixEditor) {
+      // Get HTML content from Trix editor properly
+      try {
+        // Method 1: Get HTML content from the Trix editor's document (proper way)
+        if (trixEditor.editor && trixEditor.editor.getDocument) {
+          value = trixEditor.editor.getDocument().toHTMLString()
+        } else if (trixEditor.innerHTML) {
+          // Method 2: Get innerHTML content directly
+          value = trixEditor.innerHTML
+        } else {
+          // Method 3: Fallback - look for the associated input
+          const associatedInput = document.querySelector(`input[id="${trixEditor.getAttribute('input')}"]`)
+          if (associatedInput) {
+            value = associatedInput.value
+          } else {
+            value = ''
+          }
+        }
+      } catch (error) {
+        console.error('Error getting Trix content:', error)
+        // Final fallback - try to get from innerHTML or empty
+        value = trixEditor.innerHTML || ''
+      }
+    } else if (input) {
+      if (input.type === 'checkbox') {
+        value = input.checked
+      } else {
+        value = input.value
+      }
     } else {
-      value = input.value
+      return
     }
 
     try {
@@ -201,13 +265,24 @@ export default class extends Controller {
   }
 
   updateDisplay(newContent) {
-    const display = this.element.querySelector('.editable-display')
+    const display = this.element.querySelector(':scope > .editable-display')
     if (display) {
       if (this.fieldValue === 'content') {
-        // Preserve HTML formatting for rich content
-        display.innerHTML = newContent
+        // For rich content fields, update the inner content while preserving structure
+        const contentElement = display.querySelector('.text-gray-700, .prose, h1, h2, h3, h4, h5, h6, p, div')
+        if (contentElement) {
+          contentElement.innerHTML = newContent
+        } else {
+          display.innerHTML = newContent
+        }
       } else {
-        display.textContent = newContent
+        // For title fields, update the text content of heading elements
+        const titleElement = display.querySelector('h1, h2, h3, h4, h5, h6')
+        if (titleElement) {
+          titleElement.textContent = newContent
+        } else {
+          display.textContent = newContent
+        }
       }
     }
   }
@@ -223,8 +298,15 @@ export default class extends Controller {
     if (formContainer) {
       formContainer.remove()
     }
-    if (this.hasDisplayTarget) {
-      this.displayTarget.style.display = "block"
+    
+    const display = this.element.querySelector(':scope > .editable-display')
+    if (display) {
+      display.style.display = 'block'
+    }
+    
+    const controls = this.element.querySelector(':scope > .editable-controls')
+    if (controls) {
+      controls.classList.add('hidden')
     }
   }
 

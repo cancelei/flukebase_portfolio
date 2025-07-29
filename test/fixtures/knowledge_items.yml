@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  content_type: MyString
+  content_id: 1
+  title: MyText
+  content: MyText
+  embedding: MyText
+
+two:
+  content_type: MyString
+  content_id: 1
+  title: MyText
+  content: MyText
+  embedding: MyText

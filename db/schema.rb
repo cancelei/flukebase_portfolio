@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_28_165040) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_29_012812) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -62,17 +62,75 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_28_165040) do
     t.index ["slug"], name: "index_blog_posts_on_slug", unique: true
   end
 
+  create_table "certifications", force: :cascade do |t|
+    t.string "name"
+    t.string "issuer"
+    t.date "issue_date"
+    t.date "expiry_date"
+    t.string "credential_id"
+    t.string "credential_url"
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "chat_messages", force: :cascade do |t|
     t.text "question"
     t.text "answer"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "session_id"
   end
 
   create_table "cv_entries", force: :cascade do |t|
     t.string "title"
     t.text "content"
     t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "entry_type"
+    t.string "company"
+    t.string "location"
+    t.date "start_date"
+    t.date "end_date"
+    t.boolean "current"
+  end
+
+  create_table "educations", force: :cascade do |t|
+    t.string "institution"
+    t.string "degree"
+    t.string "field_of_study"
+    t.date "start_date"
+    t.date "end_date"
+    t.boolean "current"
+    t.string "gpa"
+    t.text "achievements"
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "knowledge_items", force: :cascade do |t|
+    t.string "content_type"
+    t.integer "content_id"
+    t.text "title"
+    t.text "content"
+    t.text "embedding"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "personal_infos", force: :cascade do |t|
+    t.string "name"
+    t.string "title"
+    t.string "email"
+    t.string "phone"
+    t.string "location"
+    t.string "website"
+    t.string "linkedin"
+    t.string "twitter"
+    t.string "github"
+    t.text "summary"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -112,6 +170,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_28_165040) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["key"], name: "index_site_settings_on_key", unique: true
+  end
+
+  create_table "skills", force: :cascade do |t|
+    t.string "name"
+    t.string "category"
+    t.integer "proficiency_level"
+    t.integer "position"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "smtp_settings", force: :cascade do |t|

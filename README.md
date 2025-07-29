@@ -1,18 +1,45 @@
 # Flukebase Portfolio
 
-A comprehensive portfolio application built with **Ruby on Rails 8.0.2**, featuring AI chat integration, Flukebase project syncing, custom SMTP configuration, and modern UI with **Tailwind CSS** and **Hotwire**.
+A comprehensive portfolio application built with **Ruby on Rails 8.0.2**, featuring **AI chat integration with OpenAI LLM**, Flukebase project syncing, custom SMTP configuration, and modern UI with **Tailwind CSS** and **Hotwire**.
 
 ## ✨ Features
 
 - **Modern Rails 8 Stack**: Built with Rails 8.0.2, PostgreSQL, Tailwind CSS, and Hotwire (Turbo + Stimulus)
+- **AI Chat Integration**: **🤖 OpenAI GPT-4 powered chat assistant with vector embeddings** that helps recruiters assess candidate fit
+- **Vector Knowledge Base**: Automatically syncs professional information into searchable embeddings
 - **Admin Panel**: Complete CRUD interface for managing projects, blog posts, CV entries, and settings
-- **AI Chat Integration**: OpenAI-powered chat assistant that answers questions about your CV
 - **Flukebase Sync**: Automatic project synchronization from Flukebase.me
 - **Blog System**: Rich text blog posts with ActionText
-- **File Management**: Resume PDF uploads with Active Storage
+- **Comprehensive CV System**: Personal info, work experience, education, skills, and certifications
+- **File Management**: Resume PDF generation and downloads
 - **Email Subscriptions**: Newsletter signup with custom SMTP configuration
 - **Responsive Design**: Mobile-first design with Tailwind CSS
 - **Security**: Devise authentication, Pundit authorization, CSRF protection
+
+## 🤖 AI Chat Feature
+
+The **AI Chat** feature uses **OpenAI's GPT-4** with vector embeddings to provide intelligent responses about professional qualifications:
+
+### **For Recruiters:**
+- **Technical Assessment**: Ask about specific programming languages, frameworks, and experience levels
+- **Project Deep-Dives**: Get detailed information about past projects and technical challenges  
+- **Availability Guidance**: Learn about work preferences (full-time, part-time, freelance)
+- **Skills Evaluation**: Understand proficiency levels and certifications
+- **Context-Aware Responses**: AI pulls from comprehensive professional knowledge base
+
+### **Key Capabilities:**
+- ✅ **Vector Search**: Uses OpenAI embeddings for semantic similarity matching
+- ✅ **Real-time Responses**: Instant AI-powered answers to recruitment questions
+- ✅ **Session Management**: Each visitor gets personalized conversation history
+- ✅ **Auto-sync Knowledge**: Professional information automatically updates the AI knowledge base
+- ✅ **Recruitment Optimized**: System prompts specifically designed for hiring scenarios
+
+### **Example Questions:**
+- "What is your experience with Ruby on Rails and React?"
+- "Can you tell me about your most challenging project?"
+- "Are you available for freelance work?"
+- "What's your educational background?"
+- "Do you have experience with AWS and microservices?"
 
 ## 🛠️ Tech Stack
 

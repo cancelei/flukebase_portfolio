@@ -1,79 +1,126 @@
 class SharedEditingController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_editable_content, only: [ :show, :update ]
+  before_action :set_content_and_field
 
   def show
-    # This will render the edit form for the specific content
-    respond_to do |format|
-      format.html { render partial: "shared_editing/edit_form", locals: { content: @content } }
-      format.json { render json: { content: @content } }
-    end
+    render partial: "shared_editing/edit_form", locals: { content: @content, field: @field }
+  end
+
+  def edit
+    render partial: "shared_editing/edit_form", locals: { content: @content, field: @field }
   end
 
   def update
     case @content_type
-    when "site_setting"
-      update_site_setting
-    when "cv_entry", "cventry"
+    when "CvEntry"
       update_cv_entry
-    when "project"
+    when "PersonalInfo"
+      update_personal_info
+    when "Project"
       update_project
-    when "blog_post", "blogpost"
-      update_blog_post
+    when "SiteSetting"
+      update_site_setting
     else
-      render json: { error: "Invalid content type: #{@content_type}" }, status: 400
+      render json: { error: "Unsupported content type: #{@content_type}" }, status: 400
     end
   end
 
   private
 
-  def set_editable_content
-    @content_type = params[:content_type].to_s.downcase
+  def set_content_and_field
+    @content_type = params[:content_type].camelize
     @content_id = params[:content_id]
     @field = params[:field]
 
+    Rails.logger.debug("Content type: #{@content_type}, Content ID: #{@content_id}, Field: #{@field}")
+
     case @content_type
-    when "site_setting"
-      @content = SiteSetting.find_by(key: @content_id)
-    when "cv_entry", "cventry"  # Handle both cases
+    when "CvEntry"
       @content = CvEntry.find(@content_id)
-    when "project"
+    when "PersonalInfo"
+      @content = PersonalInfo.find(@content_id)
+    when "Project"
       @content = Project.find(@content_id)
-    when "blog_post", "blogpost"  # Handle both cases
-      @content = BlogPost.find(@content_id)
+    when "SiteSetting"
+      @content = SiteSetting.find_by(key: @content_id) || SiteSetting.find(@content_id)
     else
+      Rails.logger.error("Invalid content type: #{@content_type}")
       render json: { error: "Invalid content type: #{@content_type}" }, status: 400
+      nil
+    end
+  rescue ActiveRecord::RecordNotFound => e
+    Rails.logger.error("Content not found: #{e.message}")
+    render json: { error: "Content not found: #{e.message}" }, status: 404
+  end
+
+  def update_personal_info
+    field_value = case @field
+    when "name", "title", "email", "phone", "location", "website", "linkedin", "twitter", "github"
+      params[:value]
+    when "summary"
+      params[:value]
+    else
+      render json: { error: "Invalid field" }, status: 400
       return
     end
 
-    unless @content
-      render json: { error: "Content not found" }, status: 404
-    end
-  end
-
-  def update_site_setting
-    if @content.update(value: params[:value])
-      render json: {
-        success: true,
-        content: @content.value,
-        message: "Site setting updated successfully"
-      }
-    else
+    begin
+      if @field == "summary"
+        # Handle ActionText rich content - preserve formatting
+        @content.summary = field_value
+        if @content.save
+          render json: {
+            success: true,
+            content: @content.summary.body.to_html,
+            message: "Personal information updated successfully"
+          }
+        else
+          render json: {
+            success: false,
+            errors: @content.errors.full_messages
+          }, status: 422
+        end
+      else
+        # Handle regular fields
+        if @content.update(@field => field_value)
+          render json: {
+            success: true,
+            content: @content.send(@field),
+            message: "Personal information updated successfully"
+          }
+        else
+          render json: {
+            success: false,
+            errors: @content.errors.full_messages
+          }, status: 422
+        end
+      end
+    rescue => e
       render json: {
         success: false,
-        errors: @content.errors.full_messages
+        errors: [ e.message ]
       }, status: 422
     end
   end
 
   def update_cv_entry
     field_value = case @field
-    when "title"
+    when "title", "company"
       params[:value]
     when "content"
       params[:value]
+    when "start_date", "end_date"
+      begin
+        # Parse date from string (expecting format like "2023-07-01")
+        Date.parse(params[:value]) if params[:value].present?
+      rescue ArgumentError => e
+        render json: { error: "Invalid date format. Please use YYYY-MM-DD format." }, status: 400
+        return
+      end
+    when "current"
+      ActiveModel::Type::Boolean.new.cast(params[:value])
     else
-      render json: { error: "Invalid field" }, status: 400
+      render json: { error: "Invalid field: #{@field}" }, status: 400
       return
     end
 
@@ -96,9 +143,16 @@ class SharedEditingController < ApplicationController
       else
         # Handle regular fields
         if @content.update(@field => field_value)
+          # For date fields, return the formatted date range
+          response_content = if [ "start_date", "end_date", "current" ].include?(@field)
+                             @content.date_range
+          else
+                             @content.send(@field)
+          end
+
           render json: {
             success: true,
-            content: @content.send(@field),
+            content: response_content,
             message: "CV entry updated successfully"
           }
         else
@@ -109,6 +163,7 @@ class SharedEditingController < ApplicationController
         end
       end
     rescue => e
+      Rails.logger.error("Error updating CV entry: #{e.message}")
       render json: {
         success: false,
         errors: [ e.message ]
@@ -139,22 +194,19 @@ class SharedEditingController < ApplicationController
     end
   end
 
-  def update_blog_post
-    field_value = case @field
-    when "title"
-      params[:value]
-    when "content"
-      params[:value]
+  def update_site_setting
+    field_value = case @content.value_type
+    when "boolean"
+      params[:value] == "true"
     else
-      render json: { error: "Invalid field" }, status: 400
-      return
+      params[:value]
     end
 
-    if @content.update(@field => field_value)
+    if @content.update(value: field_value)
       render json: {
         success: true,
-        content: @content.send(@field),
-        message: "Blog post updated successfully"
+        content: @content.value,
+        message: "Setting updated successfully"
       }
     else
       render json: {

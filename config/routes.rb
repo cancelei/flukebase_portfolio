@@ -1,64 +1,67 @@
 Rails.application.routes.draw do
   devise_for :users
 
-  # Public routes
   root "home#index"
 
+  # Public routes
+  get "cv", to: "cv#show"
+  get "resume", to: "resumes#show"
+  get "chat", to: "chats#show"
+  resources :blog_posts, only: [ :index, :show ]
   resources :projects, only: [ :index, :show ]
-  resources :blog_posts, path: "blog", only: [ :index, :show ]
 
-  get "/cv", to: "cv#show"
-  resources :cv_entries, only: [ :create, :update, :destroy ]
-  get "/resume", to: "resumes#show"
-  get "/chat", to: "chats#show"
-  post "/chat", to: "chats#create"
+  # CV Management Routes
+  resources :cv_entries do
+    collection do
+      patch :reorder
+    end
+  end
+  resources :personal_infos, only: [ :show, :update ]
+  resources :skills
+  resources :educations
+  resources :certifications
 
-  post "/subscribe", to: "subscribers#create"
-
-  # Shared editing routes (authenticated users only)
-  get "/shared_editing/edit", to: "shared_editing#show"
+  # Shared editing (inline editing)
+  get "/shared_editing/edit", to: "shared_editing#edit"
   patch "/shared_editing/update", to: "shared_editing#update"
 
-  # Admin routes (protected by authentication)
+  # Admin routes
   namespace :admin do
-    get "/dashboard", to: "dashboard#index"
+    get "/", to: "dashboard#index"
+    get "dashboard", to: "dashboard#index"
 
     resources :projects
     resources :blog_posts
-    resources :resumes
-    get "/cv", to: "cv#show"
-
-    resources :subscribers, only: [ :index, :show, :destroy ]
-    resources :chat_messages, only: [ :index, :show, :destroy ]
-
-    # Settings
+    resources :cv_entries
+    resources :subscribers, only: [ :index, :show ]
     resources :site_settings, only: [ :index, :update ]
-    resources :smtp_settings, only: [ :show, :update ] do
-      member do
-        post :test
-      end
-    end
 
-    # Flukebase integration
-    get "/flukebase/settings", to: "flukebase_settings#show", as: "flukebase_settings"
-    patch "/flukebase/settings", to: "flukebase_settings#update"
-    post "/flukebase/settings/test", to: "flukebase_settings#test_connection", as: "flukebase_settings_test"
-    post "/flukebase/settings/sync", to: "flukebase_settings#sync_now", as: "flukebase_settings_sync"
-    post "/flukebase/sync", to: "flukebase#sync"
+    # Flukebase settings - single page configuration
+    get "flukebase_settings", to: "flukebase_settings#show"
+    patch "flukebase_settings", to: "flukebase_settings#update"
 
-    # Domain setup
-    get "/domain/setup", to: "domain#setup"
-    patch "/domain/setup", to: "domain#update"
+    # CV Management in Admin
+    get "cv", to: "cv#show"
+    resources :personal_infos, only: [ :show, :update ]
+    resources :skills
+    resources :educations
+    resources :certifications
   end
 
-  # Onboarding routes
+  # Newsletter subscription
+  post "subscribe", to: "subscribers#create"
+
+  # Onboarding
   namespace :onboarding do
-    get "/", to: "steps#index"
-    get "/step/:step", to: "steps#show", as: :step
-    patch "/step/:step", to: "steps#update"
-    post "/complete", to: "steps#complete"
+    resources :steps, only: [ :show, :create ]
   end
+
+  # Chat
+  resources :chats, only: [ :show, :create ]
 
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # Defines the root path route ("/")
+  # root "posts#index"
 end

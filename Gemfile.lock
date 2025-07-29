@@ -455,6 +455,7 @@ DEPENDENCIES
   jbuilder
   kamal
   kaminari
+  matrix
   pg (~> 1.1)
   pgvector
   propshaft

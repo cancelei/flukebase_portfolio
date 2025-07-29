@@ -1,54 +1,55 @@
 <div class="inline-editor-form" data-content-type="<%= content.class.name.underscore %>" data-content-id="<%= content.id %>" data-field="<%= local_assigns[:field] %>">
   <% if content.class.name == 'SiteSetting' %>
     <% if content.value_type == 'boolean' %>
-      <%= check_box_tag "inline_edit_#{content.key}", "true", SiteSetting.get(content.key), 
-          class: "inline-editor-checkbox",
-          data: { 
-            content_type: 'site_setting',
-            content_id: content.key,
-            field: 'value'
-          } %>
+      <div class="p-3">
+        <%= check_box_tag "value", "true", SiteSetting.get(content.key), 
+            class: "inline-editor-checkbox h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" %>
+        <label class="ml-2 text-sm text-gray-700">Enable <%= content.key.humanize %></label>
+      </div>
     <% else %>
-      <%= text_field_tag "inline_edit_#{content.key}", content.value,
-          class: "inline-editor-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500",
-          data: { 
-            content_type: 'site_setting',
-            content_id: content.key,
-            field: 'value'
-          } %>
+      <div class="p-3">
+        <%= text_field_tag "value", content.value,
+            class: "inline-editor-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" %>
+      </div>
     <% end %>
   <% else %>
     <% field_name = local_assigns[:field] || 'content' %>
     <% if field_name == 'content' && content.respond_to?(:content) && content.content.is_a?(ActionText::RichText) %>
-      <%= rich_text_area_tag "inline_edit_#{content.class.name.underscore}_#{content.id}_#{field_name}", 
-          content.content,
-          class: "inline-editor-rich-text",
-          data: { 
-            content_type: content.class.name.underscore,
-            content_id: content.id,
-            field: field_name
-          } %>
+      <div class="p-3">
+        <%= hidden_field_tag "value", content.content.body.to_html, class: "trix-value-input" %>
+        <trix-editor 
+          input="trix_input_<%= content.class.name.underscore %>_<%= content.id %>"
+          class="trix-content min-h-32 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+          data-trix-editor
+          placeholder="Enter your content here...">
+        </trix-editor>
+        <input type="hidden" id="trix_input_<%= content.class.name.underscore %>_<%= content.id %>" name="value" value="<%= html_escape(content.content.body.to_html) %>">
+      </div>
     <% else %>
       <% current_value = content.respond_to?(field_name) ? content.send(field_name) : '' %>
-      <% if field_name.in?(['description', 'content']) && !content.respond_to?(:content) %>
-        <%= text_area_tag "inline_edit_#{content.class.name.underscore}_#{content.id}_#{field_name}", 
-            current_value,
-            rows: 4,
-            class: "inline-editor-textarea w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500",
-            data: { 
-              content_type: content.class.name.underscore,
-              content_id: content.id,
-              field: field_name
-            } %>
+      <% if field_name == 'description' && content.respond_to?(:description) && current_value.is_a?(ActionText::RichText) %>
+        <div class="p-3">
+          <trix-editor 
+            input="trix_input_<%= content.class.name.underscore %>_<%= content.id %>_<%= field_name %>"
+            class="trix-content min-h-24 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+            data-trix-editor
+            placeholder="Enter description...">
+          </trix-editor>
+          <input type="hidden" id="trix_input_<%= content.class.name.underscore %>_<%= content.id %>_<%= field_name %>" name="value" value="<%= html_escape(current_value.body.to_html) %>">
+        </div>
+      <% elsif field_name.in?(['description', 'content']) && !current_value.is_a?(ActionText::RichText) %>
+        <div class="p-3">
+          <%= text_area_tag "value", 
+              current_value,
+              rows: 4,
+              class: "inline-editor-textarea w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" %>
+        </div>
       <% else %>
-        <%= text_field_tag "inline_edit_#{content.class.name.underscore}_#{content.id}_#{field_name}", 
-            current_value,
-            class: "inline-editor-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500",
-            data: { 
-              content_type: content.class.name.underscore,
-              content_id: content.id,
-              field: field_name
-            } %>
+        <div class="p-3">
+          <%= text_field_tag "value", 
+              current_value,
+              class: "inline-editor-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" %>
+        </div>
       <% end %>
     <% end %>
   <% end %>

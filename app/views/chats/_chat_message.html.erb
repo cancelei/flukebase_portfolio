@@ -1,0 +1,35 @@
+<div class="chat-message mb-6">
+  <!-- User Question -->
+  <div class="flex justify-end mb-3">
+    <div class="max-w-3xl">
+      <div class="bg-blue-600 text-white px-4 py-3 rounded-lg rounded-br-sm">
+        <p class="text-sm font-medium mb-1 opacity-90">You asked:</p>
+        <p><%= message.question %></p>
+      </div>
+      <p class="text-xs text-gray-500 mt-1 text-right">
+        <%= time_ago_in_words(message.created_at) %> ago
+      </p>
+    </div>
+  </div>
+
+  <!-- AI Response -->
+  <div class="flex justify-start">
+    <div class="flex items-start max-w-3xl">
+      <div class="flex-shrink-0 mr-3">
+        <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+        </div>
+      </div>
+      <div class="bg-gray-100 px-4 py-3 rounded-lg rounded-bl-sm">
+        <p class="text-sm font-medium text-gray-900 mb-1">
+          <%= PersonalInfo.current.name.presence || "AI Assistant" %>
+        </p>
+        <div class="prose prose-sm max-w-none text-gray-700">
+          <%= simple_format(message.answer) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

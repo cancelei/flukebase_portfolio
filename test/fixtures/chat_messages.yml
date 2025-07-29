@@ -1,9 +1,11 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  question: MyText
-  answer: MyText
+  question: What is your experience with Ruby on Rails?
+  answer: I have 5 years of experience with Ruby on Rails and have built several production applications.
+  session_id: session_one
 
 two:
-  question: MyText
-  answer: MyText
+  question: What technologies are you most proficient in?
+  answer: I'm most proficient in Ruby on Rails, JavaScript, and PostgreSQL.
+  session_id: session_two

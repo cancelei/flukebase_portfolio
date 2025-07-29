@@ -48,11 +48,13 @@ gem "devise"
 # Authorization
 gem "pundit"
 
-# OpenAI API for AI chat
+# AI and Vector Storage
 gem "ruby-openai"
-
-# HTTP client for Flukebase API
 gem "faraday"
+gem "matrix"
+
+# Admin interface enhancements
+gem "kaminari"
 
 # Rich text content for blog posts
 gem "actiontext"
